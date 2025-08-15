@@ -127,7 +127,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-zpoc/  # Your virtual environment folder
+zpoc/
 
 # Spyder project settings
 .spyderproject
