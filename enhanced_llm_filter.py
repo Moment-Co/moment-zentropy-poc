@@ -221,10 +221,10 @@ Return ONLY a valid JSON object with this structure:
         Create a filter for a specific team (home or away)
         """
         return {
-            "$or": [
-                {"home_team": {"$eq": team_name}},
-                {"away_team": {"$eq": team_name}}
-            ]
+                    "$or": [
+                        {"home_team": {"$eq": team_name}},
+                        {"away_team": {"$eq": team_name}}
+                    ]
         }
     
     def create_venue_filter(self, venue_name: str) -> Dict[str, Any]:
