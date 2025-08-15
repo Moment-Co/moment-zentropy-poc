@@ -25,7 +25,6 @@ except ImportError:
 # Page configuration - MUST be first Streamlit command
 st.set_page_config(
     page_title="Moment - Sports NLP Search",
-    page_icon="⚽",
     layout="wide",
     initial_sidebar_state="expanded"
 )
