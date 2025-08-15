@@ -1,74 +1,115 @@
 #!/usr/bin/env python3
 """
-Quick Start Script for ZeroEntropy
-A minimal example to get you started quickly
+Moment - Sports NLP Search Quickstart
+Simple demonstration of the ZeroEntropy API client
 """
 
 import os
 from dotenv import load_dotenv
-from zeroentropy import ZeroEntropy, ConflictError, APIStatusError
+from zeroentropy_api import ZeroEntropyAPI
 
-def quick_start():
-    """Quick start function with minimal setup"""
+def main():
+    """Quickstart demonstration"""
+    print("⚽ Moment - Sports NLP Search Quickstart")
+    print("=" * 50)
     
     # Load environment variables
     load_dotenv()
     
-    # Check API key
-    api_key = os.getenv("ZEROENTROPY_API_KEY")
-    if not api_key:
-        print("❌ ZEROENTROPY_API_KEY not found!")
-        print("Please create a .env file with your API key:")
-        print("1. Copy env.example to .env")
-        print("2. Add your ZeroEntropy API key to .env")
-        print("3. Run this script again")
+    # Check API keys
+    zeroentropy_key = os.getenv('ZEROENTROPY_API_KEY')
+    openai_key = os.getenv('OPENAI_API_KEY')
+    
+    if not zeroentropy_key:
+        print("❌ ZEROENTROPY_API_KEY not found in .env file")
+        print("   Please add your API key to the .env file")
         return
     
-    print("🚀 ZeroEntropy Quick Start")
-    print("=" * 40)
+    if not openai_key:
+        print("⚠️  OPENAI_API_KEY not found - GPT-5 features will be limited")
     
     try:
-        # Initialize client
-        client = ZeroEntropy()
-        print("✅ Client initialized")
+        # Initialize API client
+        print("🔌 Initializing ZeroEntropy API client...")
+        api = ZeroEntropyAPI()
+        print("✅ API client initialized successfully!")
         
-        # Create collection
-        collection_name = "quickstart"
+        # Test basic functionality
+        print("\n📊 Testing basic functionality...")
+        
+        # Get collections
+        print("   Getting collections...")
+        collections = api.get_collection_list()
+        if "collections" in collections:
+            print(f"   ✅ Found {len(collections['collections'])} collections")
+            for col in collections['collections']:
+                print(f"      - {col['name']}")
+        else:
+            print("   ℹ️  No collections found")
+        
+        # Test collection creation (optional)
+        print("\n🔧 Testing collection creation...")
+        test_collection = "quickstart_test"
+        
+        # Check if collection exists
         try:
-            client.collections.add(collection_name=collection_name)
-            print("✅ Collection created")
-        except ConflictError:
-            print("ℹ️  Collection already exists")
+            status = api.get_collection_status(test_collection)
+            print(f"   ℹ️  Collection '{test_collection}' already exists")
+        except:
+            print(f"   Creating test collection '{test_collection}'...")
+            result = api.add_collection(test_collection)
+            if "error" not in result:
+                print(f"   ✅ Collection '{test_collection}' created successfully!")
+            else:
+                print(f"   ❌ Failed to create collection: {result.get('error')}")
         
-        # Add a simple document
-        client.documents.add(
-            collection_name=collection_name,
-            path="hello.txt",
-            content={"type": "text", "text": "Hello from ZeroEntropy! This is a quick start example."},
-            metadata={"demo": "true"}
+        # Test document upload
+        print("\n📄 Testing document upload...")
+        test_content = "This is a test document for the quickstart demonstration."
+        test_metadata = {
+            "type": "test",
+            "source": "quickstart",
+            "venue": "Test Stadium",
+            "team": "Test Team"
+        }
+        
+        result = api.upload_csv_content(
+            collection_name=test_collection,
+            file_path="quickstart_test.txt",
+            content=test_content,
+            metadata=test_metadata
         )
-        print("✅ Document added")
         
-        # Simple query
-        results = client.queries.top_documents(
-            collection_name=collection_name,
-            query="Hello",
-            k=1
-        )
+        if "error" not in result:
+            print("   ✅ Test document uploaded successfully!")
+            
+            # Test search
+            print("\n🔍 Testing search functionality...")
+            search_results = api.search_documents(
+                collection_name=test_collection,
+                query="test document",
+                k=5
+            )
+            
+            if "error" not in search_results:
+                print(f"   ✅ Search successful! Found {len(search_results.get('documents', []))} results")
+            else:
+                print(f"   ❌ Search failed: {search_results.get('error')}")
+        else:
+            print(f"   ❌ Document upload failed: {result.get('error')}")
         
-        print(f"✅ Query successful: {len(results.results)} result(s)")
-        print(f"   Found: {results.results[0].path}")
+        print("\n🎉 Quickstart completed successfully!")
+        print("\n📚 Next steps:")
+        print("   1. Run the Streamlit app: ./launch.sh")
+        print("   2. Upload your sports documents")
+        print("   3. Start searching with GPT-5 enhanced mode!")
         
-        print("\n🎉 Quick start completed successfully!")
-        print("\nNext steps:")
-        print("- Run: python basic_example.py")
-        print("- Run: python advanced_example.py")
-        print("- Run: python async_example.py")
-        
-    except APIStatusError as e:
-        print(f"❌ API Error: {e}")
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"❌ Error during quickstart: {e}")
+        print("\n🔧 Troubleshooting:")
+        print("   1. Check your .env file has the correct API keys")
+        print("   2. Verify your internet connection")
+        print("   3. Check the ZeroEntropy API status")
 
 if __name__ == "__main__":
-    quick_start()
+    main() 
